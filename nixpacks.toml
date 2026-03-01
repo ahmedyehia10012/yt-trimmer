@@ -1,8 +1,12 @@
 [phases.setup]
 nixPkgs = ['ffmpeg', 'python3']
 
+[phases.install]
+cmds = ['npm install']
+
 [phases.build]
-cmds = ['npm install', 'cd frontend && npm install && npm run build']
+dependsOn = ['install']
+cmds = ['cd frontend && npm install && npm run build']
 
 [start]
 cmd = 'node backend/server.js'
