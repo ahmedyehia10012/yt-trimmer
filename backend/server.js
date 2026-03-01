@@ -179,15 +179,12 @@ app.get('/api/download', async (req, res) => {
                 let baseTitle = req.query.filename || info.title;
                 let safeTitle = baseTitle
                     .replace(/[<>:"/\\|?*]/g, ' ') // Only remove strictly invalid OS characters
-                    .replace(/\s+/g, '_')          // Spaces to underscores
-                    .replace(/_+/g, '_')           // Collapse multiple underscores
+                    .replace(/\s+/g, ' ')          // Collapse multiple spaces but keep them
                     .trim();
 
-                safeTitle = safeTitle.replace(/^_+|_+$/g, ''); // Trim leading/trailing underscores
-                if (!safeTitle || safeTitle === '_') safeTitle = 'video';
+                if (!safeTitle || safeTitle === ' ') safeTitle = 'video';
 
-                // Add short random suffix for uniqueness and to bypass browser duplicate handling
-                const finalFilename = `${safeTitle.substring(0, 70)}_${Math.floor(Math.random() * 900) + 100}.mp4`;
+                const finalFilename = `${safeTitle.substring(0, 100)}.mp4`;
 
                 res.download(outputPath, finalFilename, (err) => {
                     if (err) console.error('Download error:', err);

@@ -80,42 +80,6 @@ const App = () => {
     const [quality, setQuality] = useState('1080');
     const [isProcessing, setIsProcessing] = useState(false);
     const [customFilename, setCustomFilename] = useState('');
-    const [loadingMsg, setLoadingMsg] = useState('');
-
-    const funnyMessages = [
-        "استنى بس… الإنترنت بيشرب شاي.",
-        "التحميل ماشي… بس على مهله شوية.",
-        "دقيقة ونخلص… دقيقة كونية بس.",
-        "سيبه يا عم ياخد نفسه.",
-        "النت داخل يعدّي على كل بايت يسلم عليه.",
-        "لو خلص بسرعة هتزعل يعني؟",
-        "التحميل شغال… بس شكله صايم.",
-        "سيبك من البار… ركّز في أحلامك.",
-        "صبرك عليّا.",
-        "التحميل محتاج دعوة حلوة كده.",
-        "شوية صبر… الفيديو بيتظبطلك على المزاج.",
-        "اهو بيقولك: أنا جاي في السكة.",
-        "التحميل بيجري… بس حافي.",
-        "ما تبصّش للبار كتير… بيتكسف.",
-        "اهو بيلمّ نفسه وداخل على الآخر.",
-        "استنى بس… النجاح عايز وقت 😌",
-        "صلي على النبي بس."
-    ];
-
-    useEffect(() => {
-        let interval;
-        if (isProcessing) {
-            setLoadingMsg(''); // Ensure it's empty at the start
-            interval = setInterval(() => {
-                const nextMsg = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
-                setLoadingMsg(nextMsg);
-            }, 10000); // 10 seconds delay and interval
-        } else {
-            setLoadingMsg('');
-            if (interval) clearInterval(interval);
-        }
-        return () => clearInterval(interval);
-    }, [isProcessing]);
 
     const formatSec = (s) => {
         const date = new Date(null);
@@ -372,7 +336,7 @@ const App = () => {
                                         {isProcessing ? (
                                             <>
                                                 <Loader2 className="animate-spin" />
-                                                <span>جاري المعالجة...</span>
+                                                <span>جاري المعالجة والتحميل...</span>
                                             </>
                                         ) : (
                                             <>
@@ -381,19 +345,6 @@ const App = () => {
                                             </>
                                         )}
                                     </button>
-
-                                    <AnimatePresence>
-                                        {isProcessing && loadingMsg && (
-                                            <motion.p
-                                                initial={{ opacity: 0, y: -10 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                exit={{ opacity: 0 }}
-                                                className="text-brand-400 font-bold text-center px-4 py-3 bg-brand-400/5 rounded-xl border border-brand-400/10 shadow-lg"
-                                            >
-                                                {loadingMsg}
-                                            </motion.p>
-                                        )}
-                                    </AnimatePresence>
                                 </div>
                             </div>
                         </motion.div>
