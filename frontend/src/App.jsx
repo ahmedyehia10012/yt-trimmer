@@ -105,10 +105,12 @@ const App = () => {
     useEffect(() => {
         let interval;
         if (isProcessing) {
-            setLoadingMsg(funnyMessages[Math.floor(Math.random() * funnyMessages.length)]);
+            // Wait 10 seconds before showing the first funny message
             interval = setInterval(() => {
                 setLoadingMsg(funnyMessages[Math.floor(Math.random() * funnyMessages.length)]);
-            }, 2500);
+            }, 10000);
+        } else {
+            setLoadingMsg(''); // Clear messages when done
         }
         return () => clearInterval(interval);
     }, [isProcessing]);
@@ -379,12 +381,12 @@ const App = () => {
                                     </button>
 
                                     <AnimatePresence>
-                                        {isProcessing && (
+                                        {isProcessing && loadingMsg && (
                                             <motion.p
                                                 initial={{ opacity: 0, y: -10 }}
                                                 animate={{ opacity: 1, y: 0 }}
                                                 exit={{ opacity: 0 }}
-                                                className="text-brand-400 font-bold text-center px-4 py-2 bg-brand-500/5 rounded-xl border border-brand-500/10"
+                                                className="text-brand-400 font-bold text-center px-4 py-3 bg-brand-400/5 rounded-xl border border-brand-400/10 shadow-lg"
                                             >
                                                 {loadingMsg}
                                             </motion.p>
