@@ -80,6 +80,7 @@ const App = () => {
     const [quality, setQuality] = useState('1080');
     const [isProcessing, setIsProcessing] = useState(false);
     const [customFilename, setCustomFilename] = useState('');
+    const APP_VERSION = "V3.1 - Stealth";
 
     const formatSec = (s) => {
         const date = new Date(null);
@@ -368,8 +369,9 @@ const App = () => {
                         </div>
                     ))}
                 </div>
-                <div className="text-center py-10 text-slate-700 font-bold border-t border-white/5">
-                    بكل حب لإذاعة مختلف
+                <div className="text-center py-10 text-slate-700 font-bold border-t border-white/5 flex flex-col gap-2">
+                    <span>بكل حب لإذاعة مختلف</span>
+                    <span className="text-[10px] opacity-50 font-mono tracking-widest">{APP_VERSION}</span>
                 </div>
             </footer>
         </div>

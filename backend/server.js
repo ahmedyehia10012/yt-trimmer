@@ -53,6 +53,33 @@ if (!fs.existsSync(TEMP_DIR)) {
     fs.mkdirSync(TEMP_DIR);
 }
 
+// Helper for randomized bot bypass
+const getRandomSpoofConfig = () => {
+    const configs = [
+        {
+            name: 'iPhone/Safari',
+            ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Mobile/15E148 Safari/604.1',
+            client: 'ios,android,web'
+        },
+        {
+            name: 'Android/Chrome',
+            ua: 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.164 Mobile Safari/537.36',
+            client: 'android,web'
+        },
+        {
+            name: 'Windows/Chrome',
+            ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+            client: 'web,android'
+        },
+        {
+            name: 'Mac/Safari',
+            ua: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_2_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15',
+            client: 'web'
+        }
+    ];
+    return configs[Math.floor(Math.random() * configs.length)];
+};
+
 // Redirect all non-API GET requests to index.html for React SPA
 app.get(/^(?!\/api).*$/, (req, res) => {
     if (fs.existsSync(path.join(FRONTEND_DIST, 'index.html'))) {
@@ -68,14 +95,18 @@ app.get('/api/info', async (req, res) => {
     if (!url) return res.status(400).json({ error: 'URL is required' });
 
     try {
+        const spoof = getRandomSpoofConfig();
+        console.log(`[Info] Fetching with spoof: ${spoof.name}`);
+
         const info = await youtubeDl(url, {
             dumpJson: true,
             noWarnings: true,
             noCallHome: true,
             noCheckCertificate: true,
-            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+            userAgent: spoof.ua,
             addHeader: ['referer:https://www.google.com/', 'accept-language:en-US,en;q=0.9'],
-            extractorArgs: 'youtube:player-client=web,android'
+            extractorArgs: `youtube:player-client=${spoof.client}`,
+            forceIpv4: true
         });
 
         // Filter formats for video + audio
@@ -114,12 +145,16 @@ app.get('/api/download', async (req, res) => {
     if (duration <= 0) return res.status(400).json({ error: 'Invalid duration' });
 
     try {
+        const spoof = getRandomSpoofConfig();
+        console.log(`[Download] Trimming with spoof: ${spoof.name}`);
+
         // Get high quality video and audio URLs with spoofing
         const info = await youtubeDl(url, {
             dumpJson: true,
-            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+            userAgent: spoof.ua,
             addHeader: ['referer:https://www.google.com/', 'accept-language:en-US,en;q=0.9'],
-            extractorArgs: 'youtube:player-client=web,android'
+            extractorArgs: `youtube:player-client=${spoof.client}`,
+            forceIpv4: true
         });
 
         // Select the best video format for the requested height
