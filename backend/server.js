@@ -1,12 +1,27 @@
 const express = require('express');
 const cors = require('cors');
-const youtubeDl = require('yt-dlp-exec');
 const ffmpeg = require('fluent-ffmpeg');
 const ffmpegStatic = require('ffmpeg-static');
 const ffprobeStatic = require('ffprobe-static');
 const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
+const { exec } = require('child_process');
+const util = require('util');
+const execPromise = util.promisify(exec);
+
+// Custom yt-dlp wrapper to avoid python dependency issues
+const youtubeDl = async (url, options = {}) => {
+    let args = [url];
+    if (options.dumpJson) args.push('--dump-json');
+    if (options.noWarnings) args.push('--no-warnings');
+    if (options.noCheckCertificate) args.push('--no-check-certificate');
+
+    // Command can be yt-dlp or python3 -m yt_dlp
+    const command = `yt-dlp ${args.join(' ')}`;
+    const { stdout } = await execPromise(command, { maxBuffer: 1024 * 1024 * 10 });
+    return JSON.parse(stdout);
+};
 
 const app = express();
 const PORT = process.env.PORT || 3001;
