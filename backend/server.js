@@ -168,10 +168,21 @@ app.get('/api/download', async (req, res) => {
             })
             .on('end', () => {
                 console.log('FFmpeg finished processing');
-                res.download(outputPath, `${info.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.mp4`, (err) => {
+
+                // Better filename cleaning (support Arabic and avoid long underscores)
+                let safeTitle = info.title
+                    .replace(/[^\u0600-\u06FF\s\w.-]/gi, '') // Keep Arabic, alphanumeric, and basic symbols
+                    .replace(/\s+/g, '_')                  // Spaces to underscores
+                    .replace(/_+/g, '_')                   // Collapse multiple underscores
+                    .trim();
+
+                if (!safeTitle || safeTitle === '_') safeTitle = 'video';
+                const finalFilename = `${safeTitle.substring(0, 50)}.mp4`;
+
+                res.download(outputPath, finalFilename, (err) => {
                     if (err) console.error('Download error:', err);
                     // Cleanup
-                    fs.unlinkSync(outputPath);
+                    if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
                 });
             })
             .save(outputPath);

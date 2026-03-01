@@ -79,6 +79,38 @@ const App = () => {
     const [end, setEnd] = useState(0);
     const [quality, setQuality] = useState('1080');
     const [isProcessing, setIsProcessing] = useState(false);
+    const [loadingMsg, setLoadingMsg] = useState('جاري التجهيز...');
+
+    const funnyMessages = [
+        "استنى بس… الإنترنت بيشرب شاي.",
+        "التحميل ماشي… بس على مهله شوية.",
+        "دقيقة ونخلص… دقيقة كونية بس.",
+        "سيبه يا عم ياخد نفسه.",
+        "النت داخل يعدّي على كل بايت يسلم عليه.",
+        "لو خلص بسرعة هتزعل يعني؟",
+        "التحميل شغال… بس شكله صايم.",
+        "سيبك من البار… ركّز في أحلامك.",
+        "صبرك عليّا.",
+        "التحميل محتاج دعوة حلوة كده.",
+        "شوية صبر… الفيديو بيتظبطلك على المزاج.",
+        "اهو بيقولك: أنا جاي في السكة.",
+        "التحميل بيجري… بس حافي.",
+        "ما تبصّش للبار كتير… بيتكسف.",
+        "اهو بيلمّ نفسه وداخل على الآخر.",
+        "استنى بس… النجاح عايز وقت 😌",
+        "صلي على النبي بس."
+    ];
+
+    useEffect(() => {
+        let interval;
+        if (isProcessing) {
+            setLoadingMsg(funnyMessages[Math.floor(Math.random() * funnyMessages.length)]);
+            interval = setInterval(() => {
+                setLoadingMsg(funnyMessages[Math.floor(Math.random() * funnyMessages.length)]);
+            }, 3500);
+        }
+        return () => clearInterval(interval);
+    }, [isProcessing]);
 
     const formatSec = (s) => {
         const date = new Date(null);
@@ -309,23 +341,38 @@ const App = () => {
                                         <option value="720">HD Ready (720p)</option>
                                     </select>
                                 </div>
-                                <button
-                                    onClick={doDownload}
-                                    disabled={isProcessing}
-                                    className="w-full md:w-1/2 h-16 bg-gradient-to-l from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-white font-black text-2xl rounded-2xl transition-all shadow-2xl shadow-brand-500/30 flex items-center justify-center gap-4 group"
-                                >
-                                    {isProcessing ? (
-                                        <>
-                                            <Loader2 className="animate-spin" />
-                                            <span>جاري المعالجة والتحميل...</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Download size={28} className="group-hover:-translate-y-1 transition-transform" />
-                                            <span>بدء استخراج المقطع</span>
-                                        </>
-                                    )}
-                                </button>
+                                <div className="w-full md:w-1/2 space-y-4 flex flex-col items-center">
+                                    <button
+                                        onClick={doDownload}
+                                        disabled={isProcessing}
+                                        className="w-full h-16 bg-gradient-to-l from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-white font-black text-2xl rounded-2xl transition-all shadow-2xl shadow-brand-500/30 flex items-center justify-center gap-4 group"
+                                    >
+                                        {isProcessing ? (
+                                            <>
+                                                <Loader2 className="animate-spin" />
+                                                <span>جاري المعالجة...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Download size={28} className="group-hover:-translate-y-1 transition-transform" />
+                                                <span>بدء استخراج المقطع</span>
+                                            </>
+                                        )}
+                                    </button>
+
+                                    <AnimatePresence>
+                                        {isProcessing && (
+                                            <motion.p
+                                                initial={{ opacity: 0, y: -10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0 }}
+                                                className="text-brand-400 font-bold text-center px-4 py-2 bg-brand-500/5 rounded-xl border border-brand-500/10"
+                                            >
+                                                {loadingMsg}
+                                            </motion.p>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
                             </div>
                         </motion.div>
                     )}
