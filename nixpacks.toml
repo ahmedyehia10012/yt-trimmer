@@ -1,0 +1,9 @@
+[build]
+install = 'npm install && cd backend && npm install && cd ../frontend && npm install'
+build = 'cd frontend && npm run build'
+
+[run]
+start = 'cd backend && node server.js'
+
+[phases.setup]
+nixPkgs = ['ffmpeg', 'python3']
