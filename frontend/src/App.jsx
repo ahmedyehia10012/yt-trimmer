@@ -102,14 +102,46 @@ const App = () => {
         }
     };
 
-    const doDownload = () => {
+    const doDownload = async () => {
         if (start >= end) {
             setError('❌ وقت البداية يجب أن يكون أقل من وقت النهاية');
             return;
         }
         setIsProcessing(true);
-        window.location.href = `/api/download?url=${encodeURIComponent(url)}&start=${start}&end=${end}&quality=${quality}`;
-        setTimeout(() => setIsProcessing(false), 5000);
+        setError('');
+
+        try {
+            const downloadUrl = `/api/download?url=${encodeURIComponent(url)}&start=${start}&end=${end}&quality=${quality}`;
+            const response = await axios({
+                url: downloadUrl,
+                method: 'GET',
+                responseType: 'blob',
+            });
+
+            // Create a blob link to click it programmatically
+            const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = blobUrl;
+
+            // Try to extract filename from content-disposition header if possible
+            const contentDisposition = response.headers['content-disposition'];
+            let fileName = 'video.mp4';
+            if (contentDisposition) {
+                const fileNameMatch = contentDisposition.match(/filename="(.+)"/);
+                if (fileNameMatch) fileName = fileNameMatch[1];
+            }
+
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(blobUrl);
+        } catch (e) {
+            console.error('Download error:', e);
+            setError('⚠️ فشل في معالجة الفيديو. المقطع قد يكون طويل جداً أو حدث خطأ في السيرفر.');
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
     return (
@@ -126,13 +158,13 @@ const App = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     className="bg-brand-500/10 text-brand-400 px-4 py-1.5 rounded-full text-sm font-bold border border-brand-500/20 mb-4 flex items-center gap-2"
                 >
-                    <Trophy size={14} /> نسخة المحترفين 3.0
+                    <Trophy size={14} /> نسخة مخصصة لفريق <span className="font-black text-brand-300 px-1 border-b border-brand-500/30">مختلف</span>
                 </motion.div>
                 <h1 className="text-6xl md:text-8xl font-black tracking-tight bg-gradient-to-l from-white via-brand-200 to-brand-500 bg-clip-text text-transparent">
                     YouTube Cut
                 </h1>
                 <p className="text-slate-400 text-lg md:text-xl font-medium max-w-2xl leading-relaxed">
-                    الأداة الأسرع لتحميل مقاطع يوتيوب بجودة 2K وتنسيق مثالي لبرامج أدوبي بريمير وكاب كات.
+                    الأداة الأسرع لتحميل مقاطع يوتيوب بجودة 2K.
                 </p>
             </header>
 
@@ -282,7 +314,12 @@ const App = () => {
                                     disabled={isProcessing}
                                     className="w-full md:w-1/2 h-16 bg-gradient-to-l from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-white font-black text-2xl rounded-2xl transition-all shadow-2xl shadow-brand-500/30 flex items-center justify-center gap-4 group"
                                 >
-                                    {isProcessing ? <Loader2 className="animate-spin" /> : (
+                                    {isProcessing ? (
+                                        <>
+                                            <Loader2 className="animate-spin" />
+                                            <span>جاري المعالجة والتحميل...</span>
+                                        </>
+                                    ) : (
                                         <>
                                             <Download size={28} className="group-hover:-translate-y-1 transition-transform" />
                                             <span>بدء استخراج المقطع</span>
@@ -312,7 +349,7 @@ const App = () => {
                     ))}
                 </div>
                 <div className="text-center py-10 text-slate-700 font-bold border-t border-white/5">
-                    صُنع لتمكين المبدعين العرب © 2026
+                    بكل حب لإذاعة مختلف
                 </div>
             </footer>
         </div>
