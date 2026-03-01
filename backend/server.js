@@ -17,7 +17,10 @@ app.use(express.json());
 // Serve static files from the frontend build
 const FRONTEND_DIST = path.join(__dirname, '../frontend/dist');
 if (fs.existsSync(FRONTEND_DIST)) {
+    console.log('Serving frontend from:', FRONTEND_DIST);
     app.use(express.static(FRONTEND_DIST));
+} else {
+    console.log('Frontend dist folder NOT found at:', FRONTEND_DIST);
 }
 
 ffmpeg.setFfmpegPath(ffmpegStatic);
