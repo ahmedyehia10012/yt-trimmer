@@ -18,9 +18,16 @@ const youtubeDl = async (url, options = {}) => {
     if (options.noCheckCertificate) args.push('--no-check-certificate');
 
     // Command can be yt-dlp or python3 -m yt_dlp
-    const command = `yt-dlp ${args.join(' ')}`;
-    const { stdout } = await execPromise(command, { maxBuffer: 1024 * 1024 * 10 });
-    return JSON.parse(stdout);
+    let command = `yt-dlp ${args.join(' ')}`;
+    try {
+        const { stdout } = await execPromise(command, { maxBuffer: 1024 * 1024 * 10 });
+        return JSON.parse(stdout);
+    } catch (e) {
+        // Fallback to python3 module if direct binary fails
+        command = `python3 -m yt_dlp ${args.join(' ')}`;
+        const { stdout } = await execPromise(command, { maxBuffer: 1024 * 1024 * 10 });
+        return JSON.parse(stdout);
+    }
 };
 
 const app = express();
