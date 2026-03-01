@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install yt-dlp via pip to ensure it's available as a module and binary
+# Install yt-dlp via pip (standard reliable way)
 RUN python3 -m pip install --break-system-packages yt-dlp
 
 # Set working directory

@@ -169,15 +169,20 @@ app.get('/api/download', async (req, res) => {
             .on('end', () => {
                 console.log('FFmpeg finished processing');
 
-                // Better filename cleaning (support Arabic and avoid long underscores)
-                let safeTitle = info.title
-                    .replace(/[^\u0600-\u06FF\s\w.-]/gi, '') // Keep Arabic, alphanumeric, and basic symbols
-                    .replace(/\s+/g, '_')                  // Spaces to underscores
-                    .replace(/_+/g, '_')                   // Collapse multiple underscores
+                // Use custom filename if provided, otherwise use video title
+                let baseTitle = req.query.filename || info.title;
+
+                // Better filename cleaning: Keep Arabic, English, Numbers and basic symbols
+                let safeTitle = baseTitle
+                    .replace(/[^\u0600-\u06FFa-zA-Z0-9\s.-]/g, ' ') // Replace symbols with space
+                    .replace(/\s+/g, '_')                           // Spaces to underscores
+                    .replace(/_+/g, '_')                            // Collapse underscores
                     .trim();
 
+                safeTitle = safeTitle.replace(/^_+|_+$/g, ''); // Trim underscores from ends
                 if (!safeTitle || safeTitle === '_') safeTitle = 'video';
-                const finalFilename = `${safeTitle.substring(0, 50)}.mp4`;
+
+                const finalFilename = `${safeTitle.substring(0, 80)}.mp4`;
 
                 res.download(outputPath, finalFilename, (err) => {
                     if (err) console.error('Download error:', err);
