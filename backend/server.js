@@ -133,9 +133,19 @@ app.get('/api/download', async (req, res) => {
         const outputFilename = `trimmed_${uuidv4()}.mp4`;
         const outputPath = path.join(TEMP_DIR, outputFilename);
 
-        console.log(`Trimming ${info.title} from ${start} to ${end}...`);
+        console.log(`Trimming ${info.title} from ${startTime} to ${startTime + duration}...`);
 
-        ffmpeg()
+        let command = ffmpeg();
+
+        // Use system ffmpeg if available (installed via Docker)
+        if (fs.existsSync('/usr/bin/ffmpeg')) {
+            command.setFfmpegPath('/usr/bin/ffmpeg');
+        }
+        if (fs.existsSync('/usr/bin/ffprobe')) {
+            command.setFfprobePath('/usr/bin/ffprobe');
+        }
+
+        command
             .input(videoFormat.url)
             .inputOptions([`-ss ${startTime}`])
             .input(audioFormat.url)
@@ -145,12 +155,13 @@ app.get('/api/download', async (req, res) => {
                 '-c:v libx264',
                 '-preset superfast',
                 '-crf 28',
+                '-threads 1',
                 '-c:a aac',
                 '-b:a 128k',
                 '-movflags +faststart'
             ])
             .toFormat('mp4')
-            .on('start', (command) => console.log('FFmpeg started:', command))
+            .on('start', (cmd) => console.log('FFmpeg started:', cmd))
             .on('error', (err) => {
                 console.error('FFmpeg error:', err);
                 res.status(500).send('Processing failed');
