@@ -9,9 +9,8 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install yt-dlp manually to ensure it's in the PATH
-RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp \
-    && chmod a+rx /usr/local/bin/yt-dlp
+# Install yt-dlp via pip to ensure it's available as a module and binary
+RUN python3 -m pip install --break-system-packages yt-dlp
 
 # Set working directory
 WORKDIR /app
