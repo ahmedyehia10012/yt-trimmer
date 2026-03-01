@@ -186,8 +186,15 @@ app.get('/api/download', async (req, res) => {
 
                 const finalFilename = `${safeTitle.substring(0, 100)}.mp4`;
 
+                // Bulletproof way to send Arabic filenames in headers (RFC 5987)
+                const encodedFilename = encodeURIComponent(finalFilename);
+                res.setHeader('Content-Disposition', `attachment; filename="${encodedFilename}"; filename*=UTF-8''${encodedFilename}`);
+
                 res.download(outputPath, finalFilename, (err) => {
-                    if (err) console.error('Download error:', err);
+                    if (err && !res.headersSent) {
+                        console.error('Download error:', err);
+                        res.status(500).send('Download failed');
+                    }
                     // Cleanup
                     if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
                 });
