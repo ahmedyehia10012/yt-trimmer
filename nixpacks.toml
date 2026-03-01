@@ -2,11 +2,16 @@
 nixPkgs = ['ffmpeg', 'python3']
 
 [phases.install]
-cmds = ['npm install']
+cmds = [
+  'mkdir -p /app/.bin',
+  'ln -s $(which python3) /app/.bin/python',
+  'export PATH=$PATH:/app/.bin && npm install'
+]
 
 [phases.build]
-dependsOn = ['install']
-cmds = ['cd frontend && npm install && npm run build']
+cmds = [
+  'export PATH=$PATH:/app/.bin && cd frontend && npm install && npm run build'
+]
 
 [start]
-cmd = 'node backend/server.js'
+cmd = 'export PATH=$PATH:/app/.bin && node backend/server.js'
