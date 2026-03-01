@@ -73,6 +73,9 @@ app.get('/api/info', async (req, res) => {
             noWarnings: true,
             noCallHome: true,
             noCheckCertificate: true,
+            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+            addHeader: ['referer:https://www.google.com/', 'accept-language:en-US,en;q=0.9'],
+            extractorArgs: 'youtube:player-client=web,android'
         });
 
         // Filter formats for video + audio
@@ -111,9 +114,12 @@ app.get('/api/download', async (req, res) => {
     if (duration <= 0) return res.status(400).json({ error: 'Invalid duration' });
 
     try {
-        // Get high quality video and audio URLs
+        // Get high quality video and audio URLs with spoofing
         const info = await youtubeDl(url, {
             dumpJson: true,
+            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+            addHeader: ['referer:https://www.google.com/', 'accept-language:en-US,en;q=0.9'],
+            extractorArgs: 'youtube:player-client=web,android'
         });
 
         // Select the best video format for the requested height
@@ -169,20 +175,19 @@ app.get('/api/download', async (req, res) => {
             .on('end', () => {
                 console.log('FFmpeg finished processing');
 
-                // Use custom filename if provided, otherwise use video title
+                // Permissive cleaning: Remove only strictly invalid filename chars (\ / : * ? " < > |)
                 let baseTitle = req.query.filename || info.title;
-
-                // Better filename cleaning: Keep Arabic, English, Numbers and basic symbols
                 let safeTitle = baseTitle
-                    .replace(/[^\u0600-\u06FFa-zA-Z0-9\s.-]/g, ' ') // Replace symbols with space
-                    .replace(/\s+/g, '_')                           // Spaces to underscores
-                    .replace(/_+/g, '_')                            // Collapse underscores
+                    .replace(/[<>:"/\\|?*]/g, ' ') // Only remove strictly invalid OS characters
+                    .replace(/\s+/g, '_')          // Spaces to underscores
+                    .replace(/_+/g, '_')           // Collapse multiple underscores
                     .trim();
 
-                safeTitle = safeTitle.replace(/^_+|_+$/g, ''); // Trim underscores from ends
+                safeTitle = safeTitle.replace(/^_+|_+$/g, ''); // Trim leading/trailing underscores
                 if (!safeTitle || safeTitle === '_') safeTitle = 'video';
 
-                const finalFilename = `${safeTitle.substring(0, 80)}.mp4`;
+                // Add short random suffix for uniqueness and to bypass browser duplicate handling
+                const finalFilename = `${safeTitle.substring(0, 70)}_${Math.floor(Math.random() * 900) + 100}.mp4`;
 
                 res.download(outputPath, finalFilename, (err) => {
                     if (err) console.error('Download error:', err);

@@ -80,7 +80,7 @@ const App = () => {
     const [quality, setQuality] = useState('1080');
     const [isProcessing, setIsProcessing] = useState(false);
     const [customFilename, setCustomFilename] = useState('');
-    const [loadingMsg, setLoadingMsg] = useState('جاري التجهيز...');
+    const [loadingMsg, setLoadingMsg] = useState('');
 
     const funnyMessages = [
         "استنى بس… الإنترنت بيشرب شاي.",
@@ -105,12 +105,14 @@ const App = () => {
     useEffect(() => {
         let interval;
         if (isProcessing) {
-            // Wait 10 seconds before showing the first funny message
+            setLoadingMsg(''); // Ensure it's empty at the start
             interval = setInterval(() => {
-                setLoadingMsg(funnyMessages[Math.floor(Math.random() * funnyMessages.length)]);
-            }, 10000);
+                const nextMsg = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
+                setLoadingMsg(nextMsg);
+            }, 10000); // 10 seconds delay and interval
         } else {
-            setLoadingMsg(''); // Clear messages when done
+            setLoadingMsg('');
+            if (interval) clearInterval(interval);
         }
         return () => clearInterval(interval);
     }, [isProcessing]);
