@@ -310,7 +310,6 @@ const App = () => {
                                         <option value="720">HD Ready (720p)</option>
                                     </select>
                                 </div>
-                                </div>
                             </div>
 
                             {/* Download Button */}
