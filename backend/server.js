@@ -210,20 +210,10 @@ app.get('/api/download', async (req, res) => {
             .on('end', () => {
                 console.log('FFmpeg finished processing');
 
-                // Permissive cleaning: Remove only strictly invalid filename chars (\ / : * ? " < > |)
-                let baseTitle = req.query.filename || info.title;
-                let safeTitle = baseTitle
-                    .replace(/[<>:"/\\|?*]/g, ' ') // Only remove strictly invalid OS characters
-                    .replace(/\s+/g, ' ')          // Collapse multiple spaces but keep them
-                    .trim();
+                const finalFilename = "trimmed_video.mp4";
 
-                if (!safeTitle || safeTitle === ' ') safeTitle = 'video';
-
-                const finalFilename = `${safeTitle.substring(0, 100)}.mp4`;
-
-                // Bulletproof way to send Arabic filenames in headers (RFC 5987)
-                const encodedFilename = encodeURIComponent(finalFilename);
-                res.setHeader('Content-Disposition', `attachment; filename="${encodedFilename}"; filename*=UTF-8''${encodedFilename}`);
+                // Simple and safe header
+                res.setHeader('Content-Disposition', `attachment; filename="${finalFilename}"`);
 
                 res.download(outputPath, finalFilename, (err) => {
                     if (err && !res.headersSent) {

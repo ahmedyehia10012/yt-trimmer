@@ -79,8 +79,7 @@ const App = () => {
     const [end, setEnd] = useState(0);
     const [quality, setQuality] = useState('1080');
     const [isProcessing, setIsProcessing] = useState(false);
-    const [customFilename, setCustomFilename] = useState('');
-    const APP_VERSION = "V3.1 - Stealth";
+    const APP_VERSION = "V3.2 - Stable (No Custom Name)";
 
     const formatSec = (s) => {
         const date = new Date(null);
@@ -113,7 +112,7 @@ const App = () => {
         setError('');
 
         try {
-            const downloadUrl = `/api/download?url=${encodeURIComponent(url)}&start=${start}&end=${end}&quality=${quality}&filename=${encodeURIComponent(customFilename)}`;
+            const downloadUrl = `/api/download?url=${encodeURIComponent(url)}&start=${start}&end=${end}&quality=${quality}`;
             const response = await axios({
                 url: downloadUrl,
                 method: 'GET',
@@ -311,18 +310,6 @@ const App = () => {
                                         <option value="720">HD Ready (720p)</option>
                                     </select>
                                 </div>
-                                <div className="w-full md:w-1/2 space-y-4">
-                                    <label className="text-sm font-bold text-slate-400 px-2 flex items-center gap-2">
-                                        <Layout size={16} /> اسم الملف (اختياري)
-                                    </label>
-                                    <input
-                                        type="text"
-                                        placeholder="مثلاً: لقطة_مختلفة_1"
-                                        value={customFilename}
-                                        onChange={(e) => setCustomFilename(e.target.value)}
-                                        className="w-full bg-slate-900/80 border border-slate-700/50 h-16 rounded-2xl px-6 font-bold focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all font-mono"
-                                        dir="rtl"
-                                    />
                                 </div>
                             </div>
 
@@ -374,7 +361,7 @@ const App = () => {
                     <span className="text-[10px] opacity-50 font-mono tracking-widest">{APP_VERSION}</span>
                 </div>
             </footer>
-        </div>
+        </div >
     );
 };
 
