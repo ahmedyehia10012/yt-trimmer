@@ -194,8 +194,10 @@ app.get('/api/download', async (req, res) => {
             .outputOptions([
                 `-t ${duration}`,
                 '-c:v libx264',
-                '-preset faster',
+                '-preset veryfast',
                 '-crf 18',
+                '-tune film',
+                '-threads 2',
                 '-c:a aac',
                 '-b:a 256k',
                 '-movflags +faststart'
