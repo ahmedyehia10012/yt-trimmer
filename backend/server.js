@@ -194,11 +194,10 @@ app.get('/api/download', async (req, res) => {
             .outputOptions([
                 `-t ${duration}`,
                 '-c:v libx264',
-                '-preset superfast',
-                '-crf 28',
-                '-threads 1',
+                '-preset faster',
+                '-crf 18',
                 '-c:a aac',
-                '-b:a 128k',
+                '-b:a 256k',
                 '-movflags +faststart'
             ])
             .toFormat('mp4')
