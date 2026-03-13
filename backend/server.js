@@ -20,25 +20,36 @@ const youtubeDl = async (url, options = {}) => {
     // Add cookie support if file exists
     const cookiesPath = path.join(__dirname, 'cookies.txt');
     if (fs.existsSync(cookiesPath)) {
+        console.log(`[YouTube-DL] Using cookies from: ${cookiesPath}`);
         args.push(`--cookies "${cookiesPath}"`);
+    } else {
+        console.log(`[YouTube-DL] No cookies.txt found at ${cookiesPath}`);
     }
 
     if (options.userAgent) args.push(`--user-agent "${options.userAgent}"`);
+
+    // Default extractor args for stability
+    let extractorArgs = options.extractorArgs || 'youtube:player-client=ios,web,web_creator';
+    args.push(`--extractor-args "${extractorArgs}"`);
+
     if (options.addHeader) {
         options.addHeader.forEach(h => args.push(`--add-header "${h}"`));
     }
-    if (options.extractorArgs) args.push(`--extractor-args "${options.extractorArgs}"`);
     if (options.forceIpv4) args.push('--force-ipv4');
 
-    // Command can be yt-dlp or python3 -m yt_dlp
-    let command = `yt-dlp ${args.join(' ')}`;
+    // Build command safely
+    const command = `yt-dlp ${args.join(' ')}`;
+    console.log(`[YouTube-DL] Executing: yt-dlp ${url} ...`);
+
     try {
         const { stdout } = await execPromise(command, { maxBuffer: 1024 * 1024 * 10 });
         return JSON.parse(stdout);
     } catch (e) {
-        // Fallback to python3 module if direct binary fails
-        command = `python3 -m yt_dlp ${args.join(' ')}`;
-        const { stdout } = await execPromise(command, { maxBuffer: 1024 * 1024 * 10 });
+        console.error(`[YouTube-DL] Primary command failed: ${e.message}`);
+        // Fallback to python3 module
+        const fallbackCommand = `python3 -m yt_dlp ${args.join(' ')}`;
+        console.log(`[YouTube-DL] Trying fallback: python3 -m yt_dlp ...`);
+        const { stdout } = await execPromise(fallbackCommand, { maxBuffer: 1024 * 1024 * 10 });
         return JSON.parse(stdout);
     }
 };
