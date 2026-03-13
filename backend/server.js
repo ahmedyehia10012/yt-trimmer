@@ -17,6 +17,19 @@ const youtubeDl = async (url, options = {}) => {
     if (options.noWarnings) args.push('--no-warnings');
     if (options.noCheckCertificate) args.push('--no-check-certificate');
 
+    // Add cookie support if file exists
+    const cookiesPath = path.join(__dirname, 'cookies.txt');
+    if (fs.existsSync(cookiesPath)) {
+        args.push(`--cookies "${cookiesPath}"`);
+    }
+
+    if (options.userAgent) args.push(`--user-agent "${options.userAgent}"`);
+    if (options.addHeader) {
+        options.addHeader.forEach(h => args.push(`--add-header "${h}"`));
+    }
+    if (options.extractorArgs) args.push(`--extractor-args "${options.extractorArgs}"`);
+    if (options.forceIpv4) args.push('--force-ipv4');
+
     // Command can be yt-dlp or python3 -m yt_dlp
     let command = `yt-dlp ${args.join(' ')}`;
     try {
